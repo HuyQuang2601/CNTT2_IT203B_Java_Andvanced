@@ -18,7 +18,28 @@ public class DBContext {
 
     // PHẦN 2 - THỰC THI
     // Hằng số cấu hình
-    private static final String URL = "jdbc:mysql://localhost:3306/database";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        private static final String URL = "jdbc:mysql://localhost:3306/database";
     private static final String USER = "root";
     private static final String PASSWORD = "260106huy";
 
