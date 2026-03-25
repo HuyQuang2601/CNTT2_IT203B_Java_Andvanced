@@ -7,36 +7,18 @@ public class DoctorLogin {
     public static boolean login(Connection conn, String doctorCode, String password) {
         try {
             /*
-              VẤN ĐỀ SQL INJECTION (code cũ):
-             - Khi dùng nối chuỗi:
-               "SELECT * FROM Doctors WHERE code = '" + code + "' AND pass = '" + pass + "'"
-             - Hacker có thể nhập:
-               password = ' OR '1'='1
-             - Query trở thành:
-               SELECT * FROM Doctors WHERE code = 'abc' AND pass = '' OR '1'='1'
-             - Điều kiện '1'='1' luôn đúng → bypass đăng nhập
-             */
+            Phần 1:
+              PreparedStatement được xem như một tấm khiên chống SQL Injection vì nó không cho phép nối chuỗi trực tiếp vào câu lệnh SQL.
+              Khi dùng PreparedStatement, câu SQL được gửi lên database và được biên dịch trước với các dấu hỏi ? đóng vai trò chờ dữ liệu.
 
-            /*
-              TẠI SAO PreparedStatement LÀ "TẤM KHIÊN":
-              1. Cơ chế PRE-COMPILED (biên dịch trước):
-                 - Câu SQL được gửi lên DB dưới dạng template:
-                   SELECT * FROM Doctors WHERE code = ? AND pass = ?
-                 - DB sẽ biên dịch trước cấu trúc SQL (parse + plan execution)
-                - Sau đó mới gán giá trị vào dấu ?
+              Lúc này database chỉ biên dịch phần khung của câu lệnh, còn các giá trị truyền vào sau đó
+              luôn được coi là dữ liệu chứ không bao giờ được coi như một đoạn mã SQL.
+              -> Dù người dùng nhập những chuỗi nguy hiểm như ' OR '1'='1,
+              database cũng chỉ hiểu đó là một giá trị thông thường, không thể thay đổi cấu trúc câu lệnh SQL.
+              -> PreparedStatement gần như loại bỏ hoàn toàn khả năng bị SQL Injection.
+            */
 
-              2. PHÂN TÁCH CODE & DATA:
-                - Giá trị truyền vào (doctorCode, password) được coi là DATA thuần túy
-                - KHÔNG BAO GIỜ được hiểu là một phần của câu lệnh SQL
-
-              3. CHỐNG SQL INJECTION:
-                 - Nếu hacker nhập: ' OR '1'='1
-               - Nó sẽ được xử lý như một chuỗi bình thường:
-                   pass = "' OR '1'='1"
-                 - Không thể phá vỡ cấu trúc SQL → an toàn tuyệt đối
-             */
-
-            //  Sử dụng PreparedStatement an toàn
+            // Phần 2
             String sql = "SELECT * FROM Doctors WHERE code = ? AND pass = ?";
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -47,7 +29,7 @@ public class DoctorLogin {
 
             ResultSet rs = pstmt.executeQuery();
 
-            // Nếu có dữ liệu → đăng nhập thành công
+            // Nếu có dữ liệu -> đăng nhập thành công
             return rs.next();
 
         } catch (SQLException e) {
